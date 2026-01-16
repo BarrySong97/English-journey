@@ -1,0 +1,44 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import LearningJourney from "@/components/ui/learning-journey";
+import type { BlockEntry } from "@/components/ui/learning-journey";
+import { marked } from "marked";
+
+const blocksCollection = await getCollection("blocks");
+
+// Sort by date ascending
+const sortedBlocks = blocksCollection.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Format date helper
+const pad = (n: number) => String(n).padStart(2, "0");
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+
+// Build entries with rendered HTML content
+const entries: BlockEntry[] = await Promise.all(
+  sortedBlocks.map(async (block) => {
+    const date = block.data.date;
+    const htmlContent = await marked(block.body || "");
+
+    return {
+      id: block.id,
+      date: formatDate(date),
+      rawDate: date.toISOString(),
+      title: block.data.title,
+      kind: block.data.kind,
+      content: htmlContent,
+      video: block.data.video,
+    };
+  })
+);
+---
+
+<BaseLayout
+  title="English Learning Journey"
+  description="A timeline based logbook showing text notes and video practice."
+>
+  <LearningJourney client:load entries={entries} />
+</BaseLayout>

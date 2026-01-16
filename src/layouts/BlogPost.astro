@@ -1,0 +1,124 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
+import BaseLayout from "./BaseLayout.astro";
+import { Toc } from "@/components/blogs/Toc";
+import MobileToc from "@/components/blogs/MobileToc";
+import { AuthorCard } from "@/components/blogs/author-card";
+import { SocialQRCodes } from "@/components/blogs/social-qrcodes";
+
+type Props = CollectionEntry<"blog">["data"] & {
+  headings?: MarkdownHeading[];
+};
+
+const { title, description, pubDate, updatedDate, heroImage, headings } =
+  Astro.props;
+
+// 作者信息（可以从配置文件或数据库获取）
+const author = {
+  name: "Barry Song",
+  title: "什么都会点软件工程师",
+};
+
+// 社交媒体二维码（替换为实际的二维码图片）
+const socialQRCodes = [
+  {
+    platform: "哔哩哔哩",
+    label: "B站",
+    qrCodeUrl: "/og-image.png", // 替换为实际的二维码
+  },
+  {
+    platform: "小红书",
+    label: "小红书",
+    qrCodeUrl: "/og-image.png", // 替换为实际的二维码
+  },
+  {
+    platform: "抖音",
+    label: "抖音",
+    qrCodeUrl: "/og-image.png", // 替换为实际的二维码
+  },
+  {
+    platform: "微信",
+    label: "微信公众号",
+    qrCodeUrl: "/og-image.png", // 替换为实际的二维码
+  },
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <div
+    class="mx-auto 2xl:max-w-5xl max-w-3xl min-h-[calc(100vh-128px)] border border-border border-t-0 border-b-0 px-4 py-12 sm:px-6 lg:px-8"
+  >
+    {/* Article Content - 完全居中显示 */}
+    <article class="mx-auto">
+      <!-- Hero Image -->
+      {
+        heroImage && (
+          <div class="mb-8 aspect-video overflow-hidden rounded-lg">
+            <img src={heroImage} alt="" class="w-full h-full object-cover" />
+          </div>
+        )
+      }
+
+      <!-- Article Header -->
+      <header class="mb-12 space-y-4">
+        <h1 class="text-3xl font-bold sm:text-4xl">{title}</h1>
+        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <time datetime={pubDate.toISOString()}>
+            {pubDate.toLocaleDateString("zh-CN")}
+          </time>
+          {
+            updatedDate && (
+              <span class="italic">
+                (更新于 {updatedDate.toLocaleDateString("zh-CN")})
+              </span>
+            )
+          }
+        </div>
+      </header>
+
+      <!-- Article Content -->
+      <div
+        class="prose wrap-break-word max-w-none prose-headings:font-bold prose-headings:scroll-mt-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-primary prose-blockquote:italic prose-code:text-primary prose-code:bg-muted prose-code:rounded prose-code:px-1 prose-code:py-0.5 prose-strong:font-medium"
+      >
+        <slot />
+      </div>
+
+      <!-- 社交媒体二维码 -->
+      <div class="mt-16">
+        <SocialQRCodes client:load qrCodes={socialQRCodes} />
+      </div>
+
+      <!-- Back Link -->
+      <div class="mt-12 pt-8 border-t border-border">
+        <a
+          href="/blog"
+          class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          &larr; 返回博客列表
+        </a>
+      </div>
+    </article>
+  </div>
+
+  {/* Table of Contents - Fixed 在右侧，独立于页面布局 */}
+  {
+    headings && headings.length > 0 && (
+      <aside class="hidden xl:block fixed top-24 2xl:right-[max(0px,calc(50%-49rem))] right-[max(0px,calc(50%-42rem))] w-64">
+        <AuthorCard client:load author={author} />
+        <div class="sticky top-24 min-h-[calc(100vh-8rem)] overflow-y-auto">
+          <Toc client:load headings={headings} />
+        </div>
+      </aside>
+    )
+  }
+
+  {/* Mobile Table of Contents - 仅在移动端显示 */}
+  {
+    headings && headings.length > 0 && (
+      <div class="xl:hidden">
+        <MobileToc client:load headings={headings} author={author} />
+      </div>
+    )
+  }
+</BaseLayout>

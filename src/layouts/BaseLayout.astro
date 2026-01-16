@@ -1,0 +1,37 @@
+---
+import { ClientRouter } from "astro:transitions";
+import HeadSEO from "@/components/HeadSEO.astro";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+
+const { title, description, ogImage } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="overflow-hidden">
+  <head>
+    <HeadSEO title={title} description={description} ogImage={ogImage} />
+    <ClientRouter />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const dark = stored ? stored === "dark" : prefersDark;
+          document.documentElement.classList.toggle("dark", dark);
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div
+      class="flex min-h-screen flex-col bg-[rgb(247, 247, 244)] text-foreground overflow-hidden"
+    >
+      <main class="flex-1" transition:animate="fade">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
