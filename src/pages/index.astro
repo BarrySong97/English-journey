@@ -9,7 +9,7 @@ const blocksCollection = await getCollection("blocks");
 
 // Sort by date ascending
 const sortedBlocks = blocksCollection.sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
 
 // Format date helper
@@ -32,13 +32,14 @@ const entries: BlockEntry[] = await Promise.all(
       content: htmlContent,
       video: block.data.video,
     };
-  })
+  }),
 );
 ---
 
 <BaseLayout
   title="English Learning Journey"
   description="A timeline based logbook showing text notes and video practice."
+  ogImage="/og.web"
 >
   <LearningJourney client:load entries={entries} />
 </BaseLayout>
